@@ -1607,6 +1607,7 @@ class FunkinLua {
 			else
 				MusicBeatState.switchState(new FreeplayState());
 
+			options.OptionsState.onPlayState = false;
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 			PlayState.changedDifficulty = false;
 			PlayState.chartingMode = false;
