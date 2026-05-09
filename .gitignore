@@ -20,9 +20,3 @@ export/*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-
-# For Haryu's Mods
-mods/FND/*
-mods/CAWM/*
-docs/*
-docs/
