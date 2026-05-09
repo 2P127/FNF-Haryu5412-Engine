@@ -1,0 +1,60 @@
+diff --git a/src/hxcodec/flixel/FlxVideo.hx b/src/hxcodec/flixel/FlxVideo.hx
+index d66dd82..58849bc 100644
+--- a/src/hxcodec/flixel/FlxVideo.hx
++++ b/src/hxcodec/flixel/FlxVideo.hx
+@@ -22,6 +22,10 @@ class FlxVideo extends Video
+ 			#end
+ 		});
+ 
++		onEndReached.add(function() {
++			dispose();
++		});
++
+ 		FlxG.addChildBelowMouse(this);
+ 	}
+ 
+diff --git a/src/hxcodec/flixel/FlxVideoSprite.hx b/src/hxcodec/flixel/FlxVideoSprite.hx
+index 5e618ea..e36fead 100644
+--- a/src/hxcodec/flixel/FlxVideoSprite.hx
++++ b/src/hxcodec/flixel/FlxVideoSprite.hx
+@@ -14,7 +14,8 @@ import hxcodec.openfl.Video;
+ class FlxVideoSprite extends FlxSprite
+ {
+ 	// Variables
+-	public var bitmap(default, null):Video;
++	public var bitmap(default, null):FlxVideo;
++	public var onEndReached:Void->Void = null;
+ 
+ 	public function new(x:Float = 0, y:Float = 0):Void
+ 	{
+@@ -22,14 +23,28 @@ class FlxVideoSprite extends FlxSprite
+ 
+ 		makeGraphic(1, 1, FlxColor.TRANSPARENT);
+ 
+-		bitmap = new Video();
++		bitmap = new FlxVideo();
+ 		bitmap.alpha = 0;
++
+ 		bitmap.onOpening.add(function()
+ 		{
+ 			#if FLX_SOUND_SYSTEM
+ 			bitmap.volume = Std.int((FlxG.sound.muted ? 0 : 1) * (FlxG.sound.volume * 100));
+ 			#end
+ 		});
++
++		bitmap.onEndReached.add(function() {
++			if (bitmap != null) {
++				bitmap.dispose();
++				if (FlxG.game.contains(bitmap)) {
++					FlxG.game.removeChild(bitmap);
++				}
++			}
++
++			if (onEndReached != null) {
++				onEndReached();
++			}
++		});
++
+ 		bitmap.onTextureSetup.add(() -> loadGraphic(bitmap.bitmapData));
+ 		FlxG.game.addChild(bitmap);
+ 	}
