@@ -4,6 +4,7 @@ import haxe.Timer;
 import openfl.events.Event;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
+import flixel.FlxG;
 import flixel.math.FlxMath;
 #if gl_stats
 import openfl.display._internal.stats.Context3DStats;
@@ -38,6 +39,7 @@ extern "C" double getMemoryUsageMB() {
 class FPS extends TextField
 {
     public static var fpsText:TextField;
+    public static var forceHidden:Bool = false;
     // Optional override for full overlay text (set by mods/Lua). If not null, replaces default content.
     public static var overrideText:String = null;
     // Optional extra info line appended to the default overlay (ignored if overrideText is used)
@@ -94,13 +96,33 @@ class FPS extends TextField
         fpsText.textColor = 0xA8FFFFFF;
         fpsText.autoSize = LEFT;
         fpsText.alpha = 0.6;
+        fpsText.visible = !forceHidden && ClientPrefs.showFPS;
         openfl.Lib.current.addChild(fpsText);
+    }
+
+    public static function setForceHidden(hidden:Bool):Void
+    {
+        forceHidden = hidden;
+        if (fpsText != null) fpsText.visible = !hidden && ClientPrefs.showFPS;
+    }
+
+    public function setCounterVisible(show:Bool):Void
+    {
+        visible = show;
+        if (fpsText != null) fpsText.visible = show && !forceHidden;
     }
 
     @:noCompletion
     private #if !flash override #end function __enterFrame(deltaTime:Float):Void
     {
-        if (!ClientPrefs.showFPS) {
+        if (forceHidden && FlxG.state != null
+            && Type.getClassName(Type.getClass(FlxG.state)) != "flixel.system.FlxSplash")
+        {
+            forceHidden = false;
+            setCounterVisible(ClientPrefs.showFPS);
+        }
+
+        if (forceHidden || !ClientPrefs.showFPS) {
             if (fpsText != null) {
                 fpsText.visible = false;
             }

@@ -69,22 +69,6 @@ class PerformanceSettingsSubState extends BaseOptionsMenu {
 			true);
 		addOption(optWaitAudio);
 
-		// Boot-time preload (Cache state before Title)
-		var optBootPreload:Option = new Option('Boot Preload (Before Title)',
-			'Run a short preloading step before the Title Screen to warm images and audio. Reduces first-hit stutters.',
-			'bootPreloadAtBoot',
-			'bool',
-			true);
-		addOption(optBootPreload);
-
-		// Include video warm-up at boot (header read only)
-		var optBootVideo:Option = new Option('Boot Preload: Warm Videos',
-			'Also touch video files (read headers) during boot preload. No decoding, minor disk I/O.',
-			'bootPreloadVideos',
-			'bool',
-			true);
-		addOption(optBootVideo);
-
 		// Pixel UI prewarm
 		var optPixelPrewarm:Option = new Option('Prewarm Pixel UI',
 			'Preload pixel UI graphics during loading to reduce first-hit stutters.',

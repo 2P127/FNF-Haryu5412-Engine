@@ -26,7 +26,7 @@ class ClientPrefs
 	public static var noteSplashes:Bool = true;
 	public static var lowQuality:Bool = false;
 	public static var shaders:Bool = true;
-	public static var framerate:Int = 63;
+	public static var framerate:Int = 60;
 	// If enabled, keep the game's framerate synced to the current display refresh rate.
 	public static var autoFramerate:Bool = true;
 	// Synchronize buffer swaps to display refresh to reduce tearing
@@ -50,8 +50,8 @@ class ClientPrefs
 	public static var prewarmPixelAssets:Bool = true;
 	// Expand GPU prewarm to include current stage graphic(s)
 	public static var prewarmStageAssets:Bool = true;
-	// Run a boot-time preload state (Cache) before Title to warm images/audio (and optionally videos)
-	public static var bootPreloadAtBoot:Bool = true;
+	// Boot-time Cache preload is disabled; title now starts directly after splash.
+	public static var bootPreloadAtBoot:Bool = false;
 	// Also warm video files at boot by reading headers (no decoding)
 	public static var bootPreloadVideos:Bool = true;
 	public static var cursing:Bool = true;
@@ -236,7 +236,7 @@ class ClientPrefs
 			showFPS = FlxG.save.data.showFPS;
 			if (Main.fpsVar != null)
 			{
-				Main.fpsVar.visible = showFPS;
+				Main.fpsVar.setCounterVisible(showFPS);
 			}
 		}
 		if (FlxG.save.data.showRAM != null)
@@ -322,12 +322,8 @@ class ClientPrefs
 		if(FlxG.save.data.framerate != null) {
 			framerate = FlxG.save.data.framerate;
 		} else {
-			// First run: pick a sensible framerate based on the monitor refresh rate.
-			#if sys
-			framerate = DisplayUtil.getRefreshRate(60);
-			#else
+			// First run starts at a cheap fixed 60 FPS, then auto sync probes after boot settles.
 			framerate = 60;
-			#end
 		}
 		applyFramerateSettings(true);
 		if (FlxG.save.data.useFlxAnimate != null) {
@@ -457,7 +453,7 @@ class ClientPrefs
 		applyRuntimeTuning();
 	}
 
-	static var _refreshProbeCooldown:Float = 0;
+	static var _refreshProbeCooldown:Float = 2.0;
 	static var _lastRefreshRate:Int = 0;
 
 	public static function tickDisplayRefreshSync(elapsed:Float):Void
@@ -486,7 +482,7 @@ class ClientPrefs
 		#if !html5
 		var target:Int = framerate;
 		#if sys
-		if (autoFramerate)
+		if (autoFramerate && !fromLoad)
 		{
 			target = DisplayUtil.getRefreshRate(target);
 		}

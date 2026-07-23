@@ -1,10 +1,8 @@
 package;
 
-import flixel.graphics.FlxGraphic;
 import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxState;
-import openfl.Assets;
 import openfl.Lib;
 import openfl.display.FPS;
 import openfl.display.Sprite;
@@ -23,7 +21,6 @@ import sys.io.Process;
 #end
 
 import hxwindowmode.WindowColorMode;
-import util.DisplayUtil;
 
 using StringTools;
 
@@ -31,14 +28,10 @@ class Main extends Sprite
 {
 	var gameWidth:Int = 1280;
 	var gameHeight:Int = 720;
-	#if sys
-	var initialState:Class<FlxState> = Cache; // Start with Cache; it will quickly hand off to TitleState if boot preloading is disabled
-	#else
 	var initialState:Class<FlxState> = TitleState;
-	#end
 	var zoom:Float = -1;
 	var framerate:Int = 60;
-	var skipSplash:Bool = true;
+	var skipSplash:Bool = false;
 	var startFullscreen:Bool = false;
 	public static var fpsVar:FPS;
 	var game:FlxGame;
@@ -76,9 +69,6 @@ class Main extends Sprite
 
 	private function setupGame():Void
 	{
-		// Start the game loop at the monitor refresh rate (helps stability on high-Hz displays).
-		framerate = DisplayUtil.getRefreshRate(framerate);
-
 		var stageWidth:Int = Lib.current.stage.stageWidth;
 		var stageHeight:Int = Lib.current.stage.stageHeight;
 
@@ -101,14 +91,11 @@ class Main extends Sprite
 		addChild(game);
 
 		#if !mobile
+		FPS.setForceHidden(true);
 		fpsVar = new FPS(10, 3, 0xFFFFFF);
 		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		if (fpsVar != null)
-		{
-			fpsVar.visible = ClientPrefs.showFPS;
-		}
 		#end
 
 		#if html5
